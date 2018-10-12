@@ -1,14 +1,37 @@
-import axios from 'axios';
+import Search from './models/Search';
+import * as searchView from './views/searchView';
+import { elements } from './views/base'; 
 
-async function getResults(query){
-    const proxy = 'https://cors-anywhere.herokuapp.com/';
-    const key = '3351c471d6a1cbd4c1ed504d164c0ec0';
-    try{
-        const res = await axios(`${proxy}https://www.food2fork.com/api/search?key=${key}&q=${query}`);
-        const recipes = res.data.recipes;
-        console.log(recipes);
-    }catch(error){
-        alert(error);
+/** Global state managment of the app */
+/**
+ * Search object
+ * Current recipe object
+ * Shopping list object
+ * Liked object
+ */
+const state = {};
+
+const controlSearch = async () => {
+    //Get query from view
+    const query = searchView.getInput();
+    //console.log(query);
+    if(query){
+        //New search object and add to state
+        state.search = new Search(query);
+        //Prepare UI for results
+        searchView.clearInput();
+        searchView.clearResults();
+        //Search for recipes
+        await state.search.getResults();
+        //Render results on UI
+        //console.log(state.search.result);
+        searchView.renderResults(state.search.result);
+        /**Cheking your login here */
+        //console.log(state.search.query);
     }
 };
-getResults('vegan');
+
+elements.searchForm.addEventListener('submit', e => {
+    e.preventDefault();
+    controlSearch();
+});
