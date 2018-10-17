@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {key, proxy} from '../config';
+import { isBuffer } from 'util';
 
 export default class Recipe{
     constructor(id){
@@ -34,6 +35,7 @@ export default class Recipe{
     parseIngredients(){
         const unitsLong = ['tablespoons', 'tablespoon', 'ounces', 'ounce', 'teaspoons', 'teaspoon', 'cups', 'pounds'];
         const unitsShort = ['tbsp', 'tbsp', 'oz', 'oz', 'tsp', 'tsp', 'cup', 'pound'];
+        const units = [...unitsShort, 'kg', 'g'];
 
         const newIngredients = this.ingredients.map(el => {
             //unifron units
@@ -45,10 +47,24 @@ export default class Recipe{
             ingredient = ingredient.replace(/ *\([^)]*\) */g, ' ');
             //Parse ingredients into count, unit and ingredidient
             const arrIng = ingredient.split(' ');
-            const unitIndex = arrIng.findIndex(el2 => unitsShort.includes(el2));
+            const unitIndex = arrIng.findIndex(el2 => units.includes(el2));
             let objIng;
             if(unitIndex > -1){
                 //there is a unit
+                //Ex. 4 1/2 cups, arrCount is [4, 1/2] --> eval("4+1/2") --> 4.5
+                //Ex. 4 cups, arrCount is [4]
+                const arrCount = arrIng.slice(0, unitIndex);
+                let count;
+                if(arrCount.length === 1){
+                    count = eval(arrIng[0].replace('-', '+')).toFixed(2);
+                }else{
+                    count = eval(arrIng.slice(0, unitIndex).join('+')).toFixed(2);
+                }
+                objIng = {
+                    count: count,
+                    unit : arrIng[unitIndex],
+                    ingredient: arrIng.slice(unitIndex + 1).join(' ')
+                }
 
             }else if(parseInt(arrIng[0], 10)){
                 //there is NO unit, but first element is a number
