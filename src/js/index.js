@@ -95,7 +95,6 @@ const controlRecipe = async () => {
     }
 };
 window.addEventListener('hashchange', controlRecipe);
-//this makes exceed your limit requests
 window.addEventListener('load', controlRecipe);
 
 /**LIST CONTROLLER */
@@ -125,10 +124,6 @@ elements.shopping.addEventListener('click', e => {
 });
 
 /**LIKE CONTROLLER */
-/**quick fix before using local storage for the list.likes */
-state.likes = new Likes();
-likesView.toggleLikeMenu(state.likes.getNumLikes());
-
 const controlLike = () => {
     if(!state.likes) state.likes = new Likes();
     const currentID = state.recipe.id;
@@ -158,6 +153,17 @@ const controlLike = () => {
     }
     likesView.toggleLikeMenu(state.likes.getNumLikes()); 
 };
+
+//Restore liked recipes on page load
+window.addEventListener('load', () => {
+    state.likes = new Likes();
+    //Restire likes
+    state.likes.readStorage();
+    //Toggle like menu button
+    likesView.toggleLikeMenu(state.likes.getNumLikes());
+    //render the existing likes
+    state.likes.likes.forEach(like => likesView.renderLike(like));
+});
 
 //Handling recipe button clicks
 elements.recipe.addEventListener('click', e => {

@@ -1,5 +1,5 @@
 import { elements } from './base';
-import { limitrecipeTitle, limitRecipeTitle } from './searchView';
+import { limitRecipeTitle } from './searchView';
 
 export const toggleLikeButton = isLiked => {
     const iconstring = isLiked ? 'icon-heart' : 'icon-heart-outlined';
